@@ -1,12 +1,6 @@
-import React from "react";
+import React, { useRef } from "react";
 import SearchBar from "./SearchBar";
 import RepositoryContainer from "./RepositoryContainer";
-
-function sleep(delay = 0) {
-  return new Promise(resolve => {
-    setTimeout(resolve, delay);
-  });
-}
 
 const apiUrl = "http://localhost:3001/search/repositories?q=";
 
@@ -16,36 +10,17 @@ export default function SearchContainer() {
   const [options, setOptions] = React.useState<any[]>([]);
 
   const [searchValue, setSearchValue] = React.useState("");
-  const [prevSearchValue, setPrevSearchValue] = React.useState("");
   const [open, setOpen] = React.useState(false);
 
   const [optionIsSelected, setOptionIsSelected] = React.useState(false);
   const [selectedRepository, setSelectedRepository] = React.useState({});
 
+  const typeTimer = useRef<any>(null);
+
   // fetch data from backend on SearchBar value change
   React.useEffect(() => {
-    if (loading) {
-      return undefined;
-    }
-
-    if (searchValue === "") {
-      return undefined;
-    }
-
-    if (searchValue === prevSearchValue) {
-      // dont fetch again since same value
-      return undefined;
-    }
-
-    if (optionIsSelected) {
-      return undefined;
-    }
-
-    (async () => {
-      setLoading(true);
+    async function fetchData() {
       const response = await fetch(apiUrl + searchValue);
-      await sleep(1300);
-
       if (response.status === 200) {
         let repos = await response.json();
         let opts = repos.items.map((r: any) => {
@@ -53,11 +28,23 @@ export default function SearchContainer() {
         });
         setRepositories(repos.items);
         setOptions(opts);
-        setPrevSearchValue(searchValue);
       }
       setLoading(false);
-    })();
-  }, [searchValue, prevSearchValue, loading, optionIsSelected]);
+    }
+
+    if (searchValue === "" || optionIsSelected) {
+      setLoading(false);
+      clearTimeout(typeTimer.current);
+      return undefined;
+    }
+
+    setLoading(true);
+    // fetch only when user stops typing for awhile
+    clearTimeout(typeTimer.current);
+    typeTimer.current = setTimeout(() => {
+      fetchData();
+    }, 2000);
+  }, [searchValue, optionIsSelected]);
 
   function showRepository(searchBarValue: string) {
     let selectedIndex: number = -1;
@@ -86,7 +73,6 @@ export default function SearchContainer() {
           options={options}
           onInputChange={(event: any, value: any, reason: any) => {
             setOptionIsSelected(false);
-            setPrevSearchValue(searchValue);
             setSearchValue(value);
             if (reason === "reset" && value !== "") {
               showRepository(value);
