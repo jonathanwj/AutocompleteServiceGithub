@@ -8,51 +8,61 @@ function sleep(delay = 0) {
   });
 }
 
+const apiUrl = "http://localhost:3001/search/repositories?q=";
+
 export default function SearchContainer() {
   const [loading, setLoading] = React.useState(false);
   const [repositories, setRepositories] = React.useState<any[]>([]);
+  const [options, setOptions] = React.useState<any[]>([]);
+
   const [searchValue, setSearchValue] = React.useState("");
   const [prevSearchValue, setPrevSearchValue] = React.useState("");
   const [open, setOpen] = React.useState(false);
-  const [options, setOptions] = React.useState<any[]>([]);
-  const [isSelected, setIsSelected] = React.useState(false);
+
+  const [optionIsSelected, setOptionIsSelected] = React.useState(false);
   const [selectedRepository, setSelectedRepository] = React.useState({});
 
+  // fetch data from backend on SearchBar value change
   React.useEffect(() => {
     if (loading) {
       return undefined;
     }
 
-    if (searchValue === "" || searchValue === prevSearchValue || isSelected) {
+    if (searchValue === "") {
+      return undefined;
+    }
+
+    if (searchValue === prevSearchValue) {
+      // dont fetch again since same value
+      return undefined;
+    }
+
+    if (optionIsSelected) {
       return undefined;
     }
 
     (async () => {
       setLoading(true);
-      const response = await fetch(
-        "http://localhost:3001/search/repositories?q=" + searchValue
-      );
+      const response = await fetch(apiUrl + searchValue);
       await sleep(1300);
 
       if (response.status === 200) {
-        const repositories = await response.json();
-        console.log(repositories);
-        setRepositories(repositories.items);
+        let repos = await response.json();
+        let opts = repos.items.map((r: any) => {
+          return { name: r.name, full_name: r.full_name };
+        });
+        setRepositories(repos.items);
+        setOptions(opts);
         setPrevSearchValue(searchValue);
-        setOptions(
-          repositories.items.map((r: any) => {
-            return { name: r.name, full_name: r.full_name };
-          })
-        );
       }
       setLoading(false);
     })();
-  }, [searchValue, prevSearchValue, loading, isSelected]);
+  }, [searchValue, prevSearchValue, loading, optionIsSelected]);
 
-  function showRepository(value: string) {
+  function showRepository(searchBarValue: string) {
     let selectedIndex: number = -1;
     repositories.forEach((r, index) => {
-      if (r.full_name === value) {
+      if (r.full_name === searchBarValue) {
         selectedIndex = index;
       }
     });
@@ -60,6 +70,7 @@ export default function SearchContainer() {
     setSelectedRepository(repositories[selectedIndex]);
   }
 
+  // clear options on searchbar close
   React.useEffect(() => {
     if (!open) {
       setOptions([]);
@@ -74,12 +85,12 @@ export default function SearchContainer() {
           isLoading={loading}
           options={options}
           onInputChange={(event: any, value: any, reason: any) => {
-            setIsSelected(false);
+            setOptionIsSelected(false);
             setPrevSearchValue(searchValue);
             setSearchValue(value);
             if (reason === "reset" && value !== "") {
               showRepository(value);
-              setIsSelected(true);
+              setOptionIsSelected(true);
             }
           }}
           open={open}
