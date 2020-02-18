@@ -20,32 +20,35 @@ const filterOptions = (options: any, { inputValue }: { inputValue: string }) =>
 export default function SearchBar() {
   const [open, setOpen] = React.useState(false);
   const [options, setOptions] = React.useState<Repository[]>([]);
-  const loading = open && options.length === 0;
+  const [loading, setLoading] = React.useState(false);
+  const [searchValue, setSearchValue] = React.useState("");
+  const [prevSearchValue, setPrevSearchValue] = React.useState("");
 
   React.useEffect(() => {
-    let active = true;
+    if (loading) {
+      return undefined;
+    }
 
-    if (!loading) {
+    console.log(searchValue, prevSearchValue);
+
+    if (searchValue === "" || searchValue === prevSearchValue) {
       return undefined;
     }
 
     (async () => {
+      setLoading(true);
       const response = await fetch(
-        "http://localhost:3001/search/repositories?q=tetris"
+        "http://localhost:3001/search/repositories?q=" + searchValue
       );
       await sleep(1e3); // For demo purposes.
       const repositories = await response.json();
       console.log(repositories);
 
-      if (active) {
-        setOptions(repositories.items as Repository[]);
-      }
+      setOptions(repositories.items as Repository[]);
+      setPrevSearchValue(searchValue);
+      setLoading(false);
     })();
-
-    return () => {
-      active = false;
-    };
-  }, [loading]);
+  }, [searchValue, prevSearchValue, loading]);
 
   React.useEffect(() => {
     if (!open) {
@@ -55,6 +58,10 @@ export default function SearchBar() {
 
   return (
     <Autocomplete
+      onInputChange={(event, value) => {
+        setPrevSearchValue(searchValue);
+        setSearchValue(value);
+      }}
       id="asynchronous-demo"
       style={{ width: 300 }}
       open={open}
