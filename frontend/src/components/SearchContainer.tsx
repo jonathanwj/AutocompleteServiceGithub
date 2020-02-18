@@ -93,7 +93,7 @@ export default function SearchContainer() {
               setOptionIsSelected(true);
             }
           }}
-          open={open}
+          open={searchValue !== "" && open}
           onOpen={() => {
             setOpen(true);
           }}
