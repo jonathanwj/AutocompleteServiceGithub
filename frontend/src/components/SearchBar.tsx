@@ -15,7 +15,10 @@ function sleep(delay = 0) {
 }
 
 const filterOptions = (options: any, { inputValue }: { inputValue: string }) =>
-  matchSorter(options, inputValue, { keys: ["name"] });
+  matchSorter(options, inputValue, {
+    keys: ["name"],
+    threshold: matchSorter.rankings.NO_MATCH
+  });
 
 export default function SearchBar() {
   const [open, setOpen] = React.useState(false);
@@ -29,8 +32,6 @@ export default function SearchBar() {
       return undefined;
     }
 
-    console.log(searchValue, prevSearchValue);
-
     if (searchValue === "" || searchValue === prevSearchValue) {
       return undefined;
     }
@@ -40,12 +41,13 @@ export default function SearchBar() {
       const response = await fetch(
         "http://localhost:3001/search/repositories?q=" + searchValue
       );
-      await sleep(1e3); // For demo purposes.
-      const repositories = await response.json();
-      console.log(repositories);
+      await sleep(1300);
 
-      setOptions(repositories.items as Repository[]);
-      setPrevSearchValue(searchValue);
+      if (response.status === 200) {
+        const repositories = await response.json();
+        setOptions(repositories.items as Repository[]);
+        setPrevSearchValue(searchValue);
+      }
       setLoading(false);
     })();
   }, [searchValue, prevSearchValue, loading]);
@@ -71,8 +73,10 @@ export default function SearchBar() {
       onClose={() => {
         setOpen(false);
       }}
-      getOptionSelected={(option: any, value) => option.name === value.name}
-      getOptionLabel={option => option.name}
+      getOptionSelected={(option: any, value) =>
+        option.full_name === value.name
+      }
+      getOptionLabel={option => option.full_name}
       options={options}
       loading={loading}
       filterOptions={filterOptions}
