@@ -17,6 +17,9 @@ function App() {
         <Grid item xs={6} style={{ width: "100%" }}>
           <SearchContainer></SearchContainer>
         </Grid>
+        <Grid item xs={6} style={{ width: "100%" }}>
+          <div style={{ height: 300 }}></div>
+        </Grid>
       </Grid>
     </div>
   );
