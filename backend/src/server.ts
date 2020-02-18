@@ -1,5 +1,6 @@
 import express from "express";
 import axios, { AxiosResponse } from "axios";
+import cors from "cors";
 
 const app = express();
 const port = 3001;
@@ -8,7 +9,7 @@ app.get("/", async (req, res) => {
   res.send("Hello Wor;d!");
 });
 
-app.get("/search/:searchType", async (req, res) => {
+app.get("/search/:searchType", cors(), async (req, res) => {
   let searchType: string = req.params.searchType;
   let query: string = req.query.q;
   let sort: string = req.query.sort;
