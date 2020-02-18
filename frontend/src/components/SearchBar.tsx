@@ -64,8 +64,8 @@ export default function SearchBar() {
         setPrevSearchValue(searchValue);
         setSearchValue(value);
       }}
-      id="asynchronous-demo"
-      style={{ width: 300 }}
+      id="search-api"
+      style={{ width: "100%" }}
       open={open}
       onOpen={() => {
         setOpen(true);
@@ -83,7 +83,7 @@ export default function SearchBar() {
       renderInput={params => (
         <TextField
           {...params}
-          label="Asynchronous"
+          label="Search Github"
           fullWidth
           variant="outlined"
           InputProps={{
