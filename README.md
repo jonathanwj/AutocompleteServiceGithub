@@ -9,7 +9,7 @@ There are three different ways to start a local development server.
 
 Once the development server has started you can go to [localhost:3000](http://localhost:3000) to use the autocomplete service
 
-Run the commands below in order for your method of your choice
+Run the commands below in order for your method of your choice in the project root dir (containing `frontend/` and `backend/` folders)
 
 *Note:* The installation of node_modules and build process might take about 2-5 minutes.
 
