@@ -10,9 +10,10 @@ const filterOptions = (options: any, { inputValue }: { inputValue: string }) =>
     threshold: matchSorter.rankings.NO_MATCH
   });
 
-export default function SearchBar(props: any) {
+const SearchBar = React.forwardRef((props: any, ref) => {
   return (
     <Autocomplete
+      ref={ref}
       onInputChange={props.onInputChange}
       id="search-api"
       style={{ width: "100%" }}
@@ -47,4 +48,6 @@ export default function SearchBar(props: any) {
       )}
     />
   );
-}
+});
+
+export default SearchBar;

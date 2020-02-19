@@ -15,11 +15,16 @@ export default function SearchContainer() {
   const [optionIsSelected, setOptionIsSelected] = React.useState(false);
   const [selectedRepository, setSelectedRepository] = React.useState({});
 
+  const autoCompleteRef = useRef<any>(null);
+
   const typeTimer = useRef<any>(null);
+  const typeTimeDelay = 1000;
+  const [dataIsFetching, setDataIsFetching] = React.useState(false);
 
   // fetch data from backend on SearchBar value change
   React.useEffect(() => {
     async function fetchData() {
+      setDataIsFetching(true);
       const response = await fetch(apiUrl + searchValue);
       if (response.status === 200) {
         let repos = await response.json();
@@ -29,11 +34,17 @@ export default function SearchContainer() {
         setRepositories(repos.items);
         setOptions(opts);
       }
+      setDataIsFetching(false);
       setLoading(false);
     }
 
     if (searchValue === "" || optionIsSelected) {
       setLoading(false);
+      clearTimeout(typeTimer.current);
+      return undefined;
+    }
+    // prevent another fetch while data fetching
+    if (dataIsFetching) {
       clearTimeout(typeTimer.current);
       return undefined;
     }
@@ -43,7 +54,7 @@ export default function SearchContainer() {
     clearTimeout(typeTimer.current);
     typeTimer.current = setTimeout(() => {
       fetchData();
-    }, 2000);
+    }, typeTimeDelay);
   }, [searchValue, optionIsSelected]);
 
   function showRepository(searchBarValue: string) {
@@ -64,11 +75,36 @@ export default function SearchContainer() {
     }
   }, [open]);
 
+  // on options element hover, stop fetchData
+  React.useEffect(() => {
+    const eObserver = new MutationObserver((mutationList, observer) => {
+      mutationList.forEach(m => {
+        if (m.attributeName === "aria-activedescendant" && m.oldValue == null) {
+          setOptionIsSelected(true);
+        }
+      });
+    });
+    // add observer to element to watch for attribure changes
+    if (autoCompleteRef != null && autoCompleteRef.current != null) {
+      const inputElementToWatch =
+        autoCompleteRef.current.firstElementChild.firstElementChild
+          .nextElementSibling.firstElementChild;
+      eObserver.observe(inputElementToWatch, {
+        attributes: true,
+        attributeOldValue: true
+      });
+    }
+    return () => {
+      eObserver.disconnect();
+    };
+  }, []);
+
   return (
     <div>
       <h2>Github search autocomplete Service</h2>
       <div>
         <SearchBar
+          ref={autoCompleteRef}
           isLoading={loading}
           options={options}
           onInputChange={(event: any, value: any, reason: any) => {
