@@ -19,12 +19,11 @@ export default function SearchContainer() {
 
   const typeTimer = useRef<any>(null);
   const typeTimeDelay = 1000;
-  const [dataIsFetching, setDataIsFetching] = React.useState(false);
+  const [refetchToggle, setRefetchToggle] = React.useState({});
 
   // fetch data from backend on SearchBar value change
   React.useEffect(() => {
     async function fetchData() {
-      setDataIsFetching(true);
       const response = await fetch(apiUrl + searchValue);
       if (response.status === 200) {
         let repos = await response.json();
@@ -33,18 +32,15 @@ export default function SearchContainer() {
         });
         setRepositories(repos.items);
         setOptions(opts);
+        setLoading(false);
+      } else {
+        // recall useEffect
+        setRefetchToggle({});
       }
-      setDataIsFetching(false);
-      setLoading(false);
     }
 
     if (searchValue === "" || optionIsSelected) {
       setLoading(false);
-      clearTimeout(typeTimer.current);
-      return undefined;
-    }
-    // prevent another fetch while data fetching
-    if (dataIsFetching) {
       clearTimeout(typeTimer.current);
       return undefined;
     }
@@ -55,7 +51,7 @@ export default function SearchContainer() {
     typeTimer.current = setTimeout(() => {
       fetchData();
     }, typeTimeDelay);
-  }, [searchValue, optionIsSelected]);
+  }, [searchValue, optionIsSelected, refetchToggle]);
 
   function showRepository(searchBarValue: string) {
     let selectedIndex: number = -1;
