@@ -19,7 +19,7 @@ Run the commands below in order for your method of your choice in the project ro
 3. `npm start`
 
 ### docker-compose
-1. `docker-compose up`
+1. `docker-compose up --build`
 
 ### docker
 1. `docker build -t autocompleteservicegithub .`
