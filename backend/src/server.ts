@@ -60,6 +60,7 @@ async function queryGithubApi(
   if (query) fullQuery = fullQuery.concat("?q=" + query);
   if (sort) fullQuery = fullQuery.concat("&sort=" + sort);
   if (order) fullQuery = fullQuery.concat("&order=" + order);
+  fullQuery = fullQuery.concat("&per_page=100");
   return await axios.get(fullQuery);
 }
 
