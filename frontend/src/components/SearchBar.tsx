@@ -6,8 +6,7 @@ import matchSorter from "match-sorter";
 
 const filterOptions = (options: any, { inputValue }: { inputValue: string }) =>
   matchSorter(options, inputValue, {
-    keys: ["name"],
-    threshold: matchSorter.rankings.NO_MATCH
+    keys: ["name"]
   });
 
 const SearchBar = React.forwardRef((props: any, ref) => {
