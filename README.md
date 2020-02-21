@@ -15,7 +15,6 @@ Run the commands below in order for your method of your choice in the project ro
 
 ### npm
 1. `npm install`
-2. `npm run build`
 3. `npm start`
 
 ### docker-compose
