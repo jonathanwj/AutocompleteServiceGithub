@@ -7,8 +7,7 @@ WORKDIR /home/node/app
 
 COPY --chown=node:node . .
 
-RUN npm install \
-    && npm run build
+RUN npm install
 
 EXPOSE 3001
 EXPOSE 3000
