@@ -1,6 +1,7 @@
 import express from "express";
 import axios, { AxiosResponse } from "axios";
 import cors from "cors";
+import GithubController from "./github/GithubController";
 
 const app = express();
 const port = 3001;
@@ -8,6 +9,12 @@ const port = 3001;
 let nextAllowedQueryTime: number = 0;
 
 const TOO_MANY_REQUESTS_STATUS = 429;
+
+app.get("/github/search/:searchItem", cors(), async (req, res) => {
+  const results = await GithubController.show(req);
+  return res.json(results);
+});
+
 // github search endpoint route
 app.get("/search/:searchType", cors(), async (req, res) => {
   let searchType: string = req.params.searchType;
