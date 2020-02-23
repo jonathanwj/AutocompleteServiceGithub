@@ -198,10 +198,11 @@ export default class GithubService {
     queryString: string
   ): Promise<object[]> {
     if (!RateLimiter.isAllowedNextQuery()) {
-      return Promise.reject("Rate limit reached");
+      return Promise.reject(RateLimiter.RATE_LIMIT_ERROR);
     }
     const response = await Axios.get(queryString);
-    let rateLimitRemaining: number = response.headers[RATE_LIMIT_REMAINING_HEADER];
+    let rateLimitRemaining: number =
+      response.headers[RATE_LIMIT_REMAINING_HEADER];
     let rateLimitResetTime: number = response.headers[RATE_LIMIT_RESET_HEADER];
     RateLimiter.setNextAllowedQueryTime(rateLimitRemaining, rateLimitResetTime);
     const resultItems = this.extractItems(response.data.items);

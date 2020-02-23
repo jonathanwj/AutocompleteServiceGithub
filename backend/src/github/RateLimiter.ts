@@ -1,5 +1,6 @@
 import { currentTimeInSeconds } from "./utils";
 export default class RateLimiter {
+  static RATE_LIMIT_ERROR: string = "RateLimitReached";
   private static nextAllowedQueryTime: number = 0;
 
   static setNextAllowedQueryTime(

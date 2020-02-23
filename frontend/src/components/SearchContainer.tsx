@@ -2,7 +2,7 @@ import React, { useRef } from "react";
 import SearchBar from "./SearchBar";
 import RepositoryContainer from "./RepositoryContainer";
 
-const apiUrl = "http://localhost:3001/search/repositories?q=";
+const apiUrl = "http://localhost:3001/github/search/repositories?q=";
 
 export default function SearchContainer() {
   const [loading, setLoading] = React.useState(false);
@@ -24,17 +24,23 @@ export default function SearchContainer() {
   // fetch data from backend on SearchBar value change
   React.useEffect(() => {
     async function fetchData() {
-      const response = await fetch(apiUrl + searchValue);
-      if (response.status === 200) {
-        let repos = await response.json();
-        let opts = repos.items.map((r: any) => {
-          return { name: r.name, full_name: r.full_name };
-        });
-        setRepositories(repos.items);
-        setOptions(opts);
+      try {
+        const response = await fetch(apiUrl + searchValue);
+        if (response.status === 200) {
+          let repos = await response.json();
+          if (repos.rate_limited_reached) {
+            setRefetchToggle({});
+            return;
+          }
+          let opts = repos.items.map((r: any) => {
+            return { name: r.name, full_name: r.full_name };
+          });
+          setRepositories(repos.items);
+          setOptions(opts);
+          setLoading(false);
+        }
+      } catch (error) {
         setLoading(false);
-      } else {
-        // recall useEffect
         setRefetchToggle({});
       }
     }

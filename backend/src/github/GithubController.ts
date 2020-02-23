@@ -1,4 +1,5 @@
 import GithubService from "./GithubService";
+import RateLimiter from "./RateLimiter";
 
 export default class GithubController {
   static async show(requestBody: any) {
@@ -17,9 +18,23 @@ export default class GithubController {
 
     try {
       const results = await GithubService.searchGithubAPI(githubDTO);
-      return results;
+      if (results.length === 0) {
+        return {
+          rate_limited_reached: false,
+          items: results
+        };
+      } else {
+        return {
+          rate_limited_reached: false,
+          items: results
+        };
+      }
     } catch (error) {
-      console.log("githubcontroller", error);
+      if (error === RateLimiter.RATE_LIMIT_ERROR) {
+        return { rate_limited_reached: true, items: [] };
+      } else {
+        throw new Error("Unable to get proper response from Github");
+      }
     }
   }
 }
