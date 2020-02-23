@@ -1,6 +1,7 @@
 import Axios from "axios";
 import GithubQueryStringBuilder from "./GithubQueryStringBuilder";
 import { isArrayOfItems } from "./utils";
+import RateLimiter from "./RateLimiter";
 
 const GITHUB_API_URL = "https://api.github.com/search/";
 
@@ -11,6 +12,9 @@ const ISSUES = "issues";
 const USERS = "users";
 const TOPICS = "topics";
 const LABELS = "labels";
+
+const RATE_LIMIT_REMAINING_HEADER = "x-ratelimit-remaining";
+const RATE_LIMIT_RESET_HEADER = "x-ratelimit-reset";
 
 export default class GithubService {
   static async searchGithubAPI(dto: GithubDTO): Promise<object[]> {
@@ -75,8 +79,7 @@ export default class GithubService {
       queryStrBuilder.addOrder(order);
     }
     const queryString = queryStrBuilder.getQueryString();
-    const response = await Axios.get(queryString);
-    return response.data.items;
+    return await this.fetchResultItemsFromGithub(queryString);
   }
 
   static async searchCommits(
@@ -96,8 +99,7 @@ export default class GithubService {
       queryStrBuilder.addOrder(order);
     }
     const queryString = queryStrBuilder.getQueryString();
-    const response = await Axios.get(queryString);
-    return this.checkArrayOfItems(response.data.items);
+    return await this.fetchResultItemsFromGithub(queryString);
   }
 
   static async searchCode(
@@ -117,8 +119,7 @@ export default class GithubService {
       queryStrBuilder.addOrder(order);
     }
     const queryString = queryStrBuilder.getQueryString();
-    const response = await Axios.get(queryString);
-    return this.checkArrayOfItems(response.data.items);
+    return await this.fetchResultItemsFromGithub(queryString);
   }
 
   static async searchIssues(
@@ -138,8 +139,7 @@ export default class GithubService {
       queryStrBuilder.addOrder(order);
     }
     const queryString = queryStrBuilder.getQueryString();
-    const response = await Axios.get(queryString);
-    return this.checkArrayOfItems(response.data.items);
+    return await this.fetchResultItemsFromGithub(queryString);
   }
 
   static async searchUsers(
@@ -159,8 +159,7 @@ export default class GithubService {
       queryStrBuilder.addOrder(order);
     }
     const queryString = queryStrBuilder.getQueryString();
-    const response = await Axios.get(queryString);
-    return this.checkArrayOfItems(response.data.items);
+    return await this.fetchResultItemsFromGithub(queryString);
   }
 
   static async searchTopics(keywordsAndQualifiers: string[]) {
@@ -170,8 +169,7 @@ export default class GithubService {
     );
     queryStrBuilder.addKeywordsAndQualifiers(keywordsAndQualifiers);
     const queryString = queryStrBuilder.getQueryString();
-    const response = await Axios.get(queryString);
-    return this.checkArrayOfItems(response.data.items);
+    return await this.fetchResultItemsFromGithub(queryString);
   }
 
   static async searchLabels(
@@ -193,11 +191,24 @@ export default class GithubService {
       queryStrBuilder.addOrder(order);
     }
     const queryString = queryStrBuilder.getQueryString();
-    const response = await Axios.get(queryString);
-    return this.checkArrayOfItems(response.data.items);
+    return await this.fetchResultItemsFromGithub(queryString);
   }
 
-  private static checkArrayOfItems(x: any): object[] {
+  private static async fetchResultItemsFromGithub(
+    queryString: string
+  ): Promise<object[]> {
+    if (!RateLimiter.isAllowedNextQuery()) {
+      return Promise.reject("Rate limit reached");
+    }
+    const response = await Axios.get(queryString);
+    let rateLimitRemaining: number = response.headers[RATE_LIMIT_REMAINING_HEADER];
+    let rateLimitResetTime: number = response.headers[RATE_LIMIT_RESET_HEADER];
+    RateLimiter.setNextAllowedQueryTime(rateLimitRemaining, rateLimitResetTime);
+    const resultItems = this.extractItems(response.data.items);
+    return resultItems;
+  }
+
+  private static extractItems(x: any): object[] {
     if (isArrayOfItems(x)) {
       return x;
     }

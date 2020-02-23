@@ -19,7 +19,7 @@ export default class GithubController {
       const results = await GithubService.searchGithubAPI(githubDTO);
       return results;
     } catch (error) {
-      console.log(error);
+      console.log("githubcontroller", error);
     }
   }
 }

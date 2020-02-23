@@ -8,3 +8,6 @@ export function isArrayOfItems(x: any): x is object[] {
   return true;
 }
 
+export function currentTimeInSeconds() {
+  return Math.round(Date.now() / 1000);
+}
