@@ -1,12 +1,14 @@
 import GithubService from "./GithubService";
 import RateLimiter from "./RateLimiter";
+import { Request } from "express";
 
 export default class GithubController {
-  static async show(requestBody: any) {
-    const keywordsAndQualifiersString: string = requestBody.query.q;
-    const keywordsAndQualifiersArray: string[] = keywordsAndQualifiersString.split(
-      "+"
-    );
+  static async show(requestBody: Request) {
+    let keywordsAndQualifiersArray: string[] | undefined;
+    const keywordsAndQualifiersString: string | undefined = requestBody.query.q;
+    if (keywordsAndQualifiersString) {
+      keywordsAndQualifiersArray = keywordsAndQualifiersString.split("+");
+    }
 
     const githubDTO: GithubDTO = {
       searchItem: requestBody.params.searchItem,
@@ -30,10 +32,10 @@ export default class GithubController {
         };
       }
     } catch (error) {
-      if (error === RateLimiter.RATE_LIMIT_ERROR) {
+      if (error.message === RateLimiter.RATE_LIMIT_ERROR) {
         return { rate_limited_reached: true, items: [] };
       } else {
-        throw new Error("Unable to get proper response from Github");
+        throw error;
       }
     }
   }

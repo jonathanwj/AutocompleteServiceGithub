@@ -1,4 +1,4 @@
-import Axios from "axios";
+import Axios, { AxiosResponse, AxiosError } from "axios";
 import GithubQueryStringBuilder from "./GithubQueryStringBuilder";
 import { isArrayOfItems } from "./utils";
 import RateLimiter from "./RateLimiter";
@@ -19,7 +19,7 @@ const RATE_LIMIT_RESET_HEADER = "x-ratelimit-reset";
 export default class GithubService {
   static async searchGithubAPI(dto: GithubDTO): Promise<object[]> {
     if (!dto.keywordsAndQualifiers) {
-      return Promise.reject("Missing keywordsAndQualifiers");
+      throw new Error("Missing keywordsAndQualifiers");
     }
     switch (dto.searchItem) {
       case REPOSITORIES:
@@ -48,7 +48,7 @@ export default class GithubService {
         return this.searchTopics(dto.keywordsAndQualifiers);
       case LABELS:
         if (!dto.repositoryID) {
-          return Promise.reject("Missing searchLabels");
+          throw new Error("Missing searchLabels");
         }
         return this.searchLabels(
           dto.repositoryID,
@@ -57,7 +57,7 @@ export default class GithubService {
           dto.order
         );
       default:
-        return Promise.reject("No such search Item: " + dto.searchItem);
+        throw new Error("No such search Item: " + dto.searchItem);
     }
   }
 
@@ -198,13 +198,29 @@ export default class GithubService {
     queryString: string
   ): Promise<object[]> {
     if (!RateLimiter.isAllowedNextQuery()) {
-      return Promise.reject(RateLimiter.RATE_LIMIT_ERROR);
+      throw new Error(RateLimiter.RATE_LIMIT_ERROR);
     }
-    const response = await Axios.get(queryString);
-    let rateLimitRemaining: number =
-      response.headers[RATE_LIMIT_REMAINING_HEADER];
-    let rateLimitResetTime: number = response.headers[RATE_LIMIT_RESET_HEADER];
-    RateLimiter.setNextAllowedQueryTime(rateLimitRemaining, rateLimitResetTime);
+    let response: AxiosResponse;
+    try {
+      response = await Axios.get(queryString);
+    } catch (error) {
+      let e: any = new Error("Github fetch error");
+      e.axiosError = error;
+      throw e;
+    }
+    let rateLimitRemaining: any = response.headers[RATE_LIMIT_REMAINING_HEADER];
+    let rateLimitResetTime: any = response.headers[RATE_LIMIT_RESET_HEADER];
+    if (
+      typeof rateLimitRemaining === "string" &&
+      typeof rateLimitResetTime === "string"
+    ) {
+      RateLimiter.setNextAllowedQueryTime(
+        parseInt(rateLimitRemaining),
+        parseInt(rateLimitResetTime)
+      );
+    } else {
+      throw new Error("Rate limit missing");
+    }
     const resultItems = this.extractItems(response.data.items);
     return resultItems;
   }

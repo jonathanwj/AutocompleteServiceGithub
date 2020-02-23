@@ -10,6 +10,7 @@ app.get("/github/search/:searchItem", cors(), async (req, res) => {
     const githubRes = await GithubController.show(req);
     return res.json(githubRes);
   } catch (error) {
+    console.error(error);
     return res.sendStatus(500);
   }
 });
