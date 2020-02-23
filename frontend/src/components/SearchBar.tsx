@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import TextField from "@material-ui/core/TextField";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import CircularProgress from "@material-ui/core/CircularProgress";
@@ -9,10 +9,36 @@ const filterOptions = (options: any, { inputValue }: { inputValue: string }) =>
     keys: ["name"]
   });
 
-const SearchBar = React.forwardRef((props: any, ref) => {
+const SearchBar = (props: any) => {
+  const autoCompleteRef = useRef<any>(null);
+
+  // on options element hover, stop fetchData
+  React.useEffect(() => {
+    const eObserver = new MutationObserver((mutationList, observer) => {
+      mutationList.forEach(m => {
+        if (m.attributeName === "aria-activedescendant" && m.oldValue == null) {
+          props.onOptionHover();
+        }
+      });
+    });
+    // add observer to element to watch for attribure changes
+    if (autoCompleteRef != null && autoCompleteRef.current != null) {
+      const inputElementToWatch =
+        autoCompleteRef.current.firstElementChild.firstElementChild
+          .nextElementSibling.firstElementChild;
+      eObserver.observe(inputElementToWatch, {
+        attributes: true,
+        attributeOldValue: true
+      });
+    }
+    return () => {
+      eObserver.disconnect();
+    };
+  }, [props]);
+
   return (
     <Autocomplete
-      ref={ref}
+      ref={autoCompleteRef}
       onInputChange={props.onInputChange}
       id="search-api"
       style={{ width: "100%" }}
@@ -47,6 +73,6 @@ const SearchBar = React.forwardRef((props: any, ref) => {
       )}
     />
   );
-});
+};
 
 export default SearchBar;

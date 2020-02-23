@@ -15,8 +15,6 @@ export default function SearchContainer() {
   const [optionIsSelected, setOptionIsSelected] = React.useState(false);
   const [selectedRepository, setSelectedRepository] = React.useState({});
 
-  const autoCompleteRef = useRef<any>(null);
-
   const typeTimer = useRef<any>(null);
   const typeTimeDelay = 1000;
   const [refetchToggle, setRefetchToggle] = React.useState({});
@@ -50,7 +48,6 @@ export default function SearchContainer() {
       clearTimeout(typeTimer.current);
       return undefined;
     }
-
     setLoading(true);
     // fetch only when user stops typing for awhile
     clearTimeout(typeTimer.current);
@@ -77,38 +74,16 @@ export default function SearchContainer() {
     }
   }, [open]);
 
-  // on options element hover, stop fetchData
-  React.useEffect(() => {
-    const eObserver = new MutationObserver((mutationList, observer) => {
-      mutationList.forEach(m => {
-        if (m.attributeName === "aria-activedescendant" && m.oldValue == null) {
-          setOptionIsSelected(true);
-        }
-      });
-    });
-    // add observer to element to watch for attribure changes
-    if (autoCompleteRef != null && autoCompleteRef.current != null) {
-      const inputElementToWatch =
-        autoCompleteRef.current.firstElementChild.firstElementChild
-          .nextElementSibling.firstElementChild;
-      eObserver.observe(inputElementToWatch, {
-        attributes: true,
-        attributeOldValue: true
-      });
-    }
-    return () => {
-      eObserver.disconnect();
-    };
-  }, []);
-
   return (
     <div>
       <h2>Github search autocomplete Service</h2>
       <div>
         <SearchBar
-          ref={autoCompleteRef}
           isLoading={loading}
           options={options}
+          onOptionHover={() => {
+            setOptionIsSelected(true);
+          }}
           onInputChange={(event: any, value: any, reason: any) => {
             setOptionIsSelected(false);
             setSearchValue(value);
