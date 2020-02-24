@@ -86,10 +86,16 @@ const SearchBar = (props: any) => {
       getOptionSelected={(option: any, value) =>
         option.full_name === value.full_name
       }
-      getOptionLabel={option => option.full_name}
+      getOptionLabel={option => {
+        if (!option.full_name) {
+          return "";
+        }
+        return option.full_name;
+      }}
       options={props.options}
       loading={props.isLoading}
       filterOptions={filterOptions}
+      freeSolo={true}
       renderInput={params => (
         <TextField
           {...params}

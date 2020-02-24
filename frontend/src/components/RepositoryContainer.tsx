@@ -54,13 +54,17 @@ export default function RepositoryContainer(props: any) {
       }
       switch (selectedSearchItem) {
         case searchItem.Commits:
-          opts = data.items.map((c: any) => {
-            return { name: c.commit.message, full_name: c.commit.message };
+          opts = data.items.map((item: any) => {
+            return {
+              name: item.commit.message,
+              full_name: item.commit.message,
+              ...item
+            };
           });
           break;
         case searchItem.IssuesAndPR:
-          opts = data.items.map((c: any) => {
-            return { name: c.title, full_name: c.title };
+          opts = data.items.map((item: any) => {
+            return { name: item.title, full_name: item.title, ...item };
           });
           break;
         default:
@@ -87,6 +91,9 @@ export default function RepositoryContainer(props: any) {
     typeTimer.current = setTimeout(() => {
       fetchData();
     }, typeTimeDelay);
+    return () => {
+      clearTimeout(typeTimer.current);
+    };
   }, [searchValue, optionIsSelected, refetchToggle, fetchData]);
 
   function handleOnEnterPressed() {
@@ -94,54 +101,73 @@ export default function RepositoryContainer(props: any) {
     clearTimeout(typeTimer.current);
   }
 
-  if (Object.keys(repo).length === 0) {
-    return <div></div>;
-  } else {
-    return (
-      <div>
-        <Container>
-          <h1>{repo.full_name}</h1>
-          <h2>{repo.name}</h2>
-          <p>{repo.description}</p>
-          <a href={`${repo.html_url}`}>{repo.html_url}</a>
-        </Container>
-        <SearchBar
-          isLoading={loading}
-          options={options}
-          onOptionHover={() => {
-            setOptionIsSelected(true);
-          }}
-          onOptionSelected={(value: any) => {
-            setOptionIsSelected(true);
-          }}
-          onEnterPressed={() => {
-            handleOnEnterPressed();
-          }}
-          onInputChange={(event: any, value: any, reason: any) => {
-            setOptionIsSelected(false);
-            setSearchValue(value);
-          }}
-          open={searchValue !== "" && open}
-          onOpen={() => {
-            setOpen(true);
-          }}
-          onClose={() => {
-            setOpen(false);
-          }}
-        ></SearchBar>
-        <Select
-          value={selectedSearchItem}
-          onChange={(e: any) => {
-            setSelectedSearchItem(e.target.value);
-          }}
-          displayEmpty
-        >
-          <MenuItem value={searchItem.Commits}>{searchItem.Commits}</MenuItem>
-          <MenuItem value={searchItem.IssuesAndPR}>
-            {searchItem.IssuesAndPR}
-          </MenuItem>
-        </Select>
-      </div>
-    );
+  function goToUrl(searchBarValue: string) {
+    let selectedIndex: number = -1;
+    options.forEach((opt, index) => {
+      if (opt.full_name === searchBarValue) {
+        selectedIndex = index;
+      }
+    });
+    if (selectedIndex === -1) return;
+    let selectedOption = options[selectedIndex];
+    switch (selectedSearchItem) {
+      case searchItem.Commits:
+        window.open(selectedOption.html_url);
+        break;
+      case searchItem.IssuesAndPR:
+        window.open(selectedOption.html_url);
+        break;
+      default:
+        throw new Error("Missing searchItem Type");
+    }
   }
+
+  return (
+    <div>
+      <Container>
+        <h1>{repo.full_name}</h1>
+        <h2>{repo.name}</h2>
+        <p>{repo.description}</p>
+        <a href={`${repo.html_url}`}>{repo.html_url}</a>
+      </Container>
+      <SearchBar
+        isLoading={loading}
+        options={options}
+        onOptionHover={() => {
+          setOptionIsSelected(true);
+        }}
+        onOptionSelected={(value: any) => {
+          goToUrl(value);
+          setOptionIsSelected(true);
+        }}
+        onEnterPressed={() => {
+          handleOnEnterPressed();
+        }}
+        onInputChange={(event: any, value: any, reason: any) => {
+          setOptionIsSelected(false);
+          setSearchValue(value);
+        }}
+        open={searchValue !== "" && open}
+        onOpen={() => {
+          setOpen(true);
+        }}
+        onClose={() => {
+          setOpen(false);
+        }}
+      ></SearchBar>
+      <Select
+        value={selectedSearchItem}
+        onChange={(e: any) => {
+          setSelectedSearchItem(e.target.value);
+          setOptions([]);
+        }}
+        displayEmpty
+      >
+        <MenuItem value={searchItem.Commits}>{searchItem.Commits}</MenuItem>
+        <MenuItem value={searchItem.IssuesAndPR}>
+          {searchItem.IssuesAndPR}
+        </MenuItem>
+      </Select>
+    </div>
+  );
 }

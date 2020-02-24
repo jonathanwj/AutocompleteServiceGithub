@@ -115,11 +115,15 @@ export default function SearchContainer() {
           }}
         ></SearchBar>
       </div>
-      <div>
-        <RepositoryContainer
-          repository={selectedRepository}
-        ></RepositoryContainer>
-      </div>
+      {Object.keys(selectedRepository).length === 0 ? (
+        <div></div>
+      ) : (
+        <div>
+          <RepositoryContainer
+            repository={selectedRepository}
+          ></RepositoryContainer>
+        </div>
+      )}
     </div>
   );
 }
