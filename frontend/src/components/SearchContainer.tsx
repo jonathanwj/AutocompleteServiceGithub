@@ -1,6 +1,8 @@
 import React, { useRef } from "react";
 import SearchBar from "./SearchBar";
 import RepositoryContainer from "./RepositoryContainer";
+import GithubAPI from "../api/GithubAPI";
+import { stringToArray } from "../api/Utils";
 
 const apiUrl = "http://localhost:3001/github/search/repositories?q=";
 
@@ -23,7 +25,10 @@ export default function SearchContainer() {
   React.useEffect(() => {
     async function fetchData() {
       try {
-        const response = await fetch(apiUrl + searchValue);
+        const response = await GithubAPI.fetchRepositories(
+          stringToArray(searchValue)
+        );
+        // const response = await fetch(apiUrl + searchValue);
         if (response.status === 200) {
           let repos = await response.json();
           if (repos.rate_limited_reached) {
