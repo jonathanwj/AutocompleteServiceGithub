@@ -3,12 +3,7 @@ import { Container, MenuItem, Select } from "@material-ui/core";
 import SearchBar from "./SearchBar";
 import GithubAPI from "../api/GithubAPI";
 import { stringToArray } from "../api/Utils";
-
-enum searchItem {
-  Commits = "Commits",
-  Code = "Code",
-  IssuesAndPR = "Issues And Pull Requests"
-}
+import { GithubSearchItems } from "../api/GithubSearchItems";
 
 export default function RepositoryContainer(props: any) {
   let repo = props.repository;
@@ -25,20 +20,43 @@ export default function RepositoryContainer(props: any) {
   const [refetchToggle, setRefetchToggle] = React.useState({});
 
   const [selectedSearchItem, setSelectedSearchItem] = React.useState(
-    searchItem.Commits
+    GithubSearchItems.Commits
   );
+
+  function dataToOpts(searchItemType: string, data: any): any[] {
+    let opts = [];
+    switch (searchItemType) {
+      case GithubSearchItems.Commits:
+        opts = data.items.map((item: any) => {
+          return {
+            name: item.commit.message,
+            full_name: item.commit.message,
+            ...item
+          };
+        });
+        break;
+      case GithubSearchItems.IssuesAndPR:
+        opts = data.items.map((item: any) => {
+          return { name: item.title, full_name: item.title, ...item };
+        });
+        break;
+      default:
+        throw new Error("Missing searchItem Type");
+    }
+    return opts;
+  }
 
   const fetchData = useCallback(async () => {
     try {
       let data: any;
       switch (selectedSearchItem) {
-        case searchItem.Commits:
+        case GithubSearchItems.Commits:
           data = await GithubAPI.searchCommits(
             stringToArray(searchValue),
             repo.full_name
           );
           break;
-        case searchItem.IssuesAndPR:
+        case GithubSearchItems.IssuesAndPR:
           data = await GithubAPI.searchIssuesAndPR(
             stringToArray(searchValue),
             repo.full_name
@@ -47,29 +65,11 @@ export default function RepositoryContainer(props: any) {
         default:
           throw new Error("Missing searchItem type");
       }
-      let opts: any[];
       if (data.rate_limited_reached) {
         setRefetchToggle({});
         return;
       }
-      switch (selectedSearchItem) {
-        case searchItem.Commits:
-          opts = data.items.map((item: any) => {
-            return {
-              name: item.commit.message,
-              full_name: item.commit.message,
-              ...item
-            };
-          });
-          break;
-        case searchItem.IssuesAndPR:
-          opts = data.items.map((item: any) => {
-            return { name: item.title, full_name: item.title, ...item };
-          });
-          break;
-        default:
-          throw new Error("Missing searchItem Type");
-      }
+      let opts = dataToOpts(selectedSearchItem, data);
       setOptions(opts);
       setLoading(false);
     } catch (error) {
@@ -111,10 +111,10 @@ export default function RepositoryContainer(props: any) {
     if (selectedIndex === -1) return;
     let selectedOption = options[selectedIndex];
     switch (selectedSearchItem) {
-      case searchItem.Commits:
+      case GithubSearchItems.Commits:
         window.open(selectedOption.html_url);
         break;
-      case searchItem.IssuesAndPR:
+      case GithubSearchItems.IssuesAndPR:
         window.open(selectedOption.html_url);
         break;
       default:
@@ -164,9 +164,9 @@ export default function RepositoryContainer(props: any) {
         }}
         displayEmpty
       >
-        <MenuItem value={searchItem.Commits}>{searchItem.Commits}</MenuItem>
-        <MenuItem value={searchItem.IssuesAndPR}>
-          {searchItem.IssuesAndPR}
+        <MenuItem value={GithubSearchItems.Commits}>{GithubSearchItems.Commits}</MenuItem>
+        <MenuItem value={GithubSearchItems.IssuesAndPR}>
+          {GithubSearchItems.IssuesAndPR}
         </MenuItem>
       </Select>
     </div>

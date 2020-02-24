@@ -115,6 +115,30 @@ export default class GithubAPI {
     return response;
   }
 
+  static async searchUsers(
+    keywordsAndQualifiers: string[],
+    sort?: string,
+    order?: string
+  ) {
+    let queryStringBuilder = new GithubQueryStringBuilder(this.apiUrl, "users");
+    if (!keywordsAndQualifiers || keywordsAndQualifiers.length === 0) {
+      throw new Error("No keyword and qualifier specified");
+    }
+    keywordsAndQualifiers.forEach(item => {
+      queryStringBuilder.addKeywordOrQualifier(item);
+    });
+    if (sort) {
+      queryStringBuilder.addSort(sort);
+    }
+    if (order) {
+      queryStringBuilder.addOrder(order);
+    }
+    const response = await this.fetchFromBackend(
+      queryStringBuilder.getQueryString()
+    );
+    return response;
+  }
+
   static async fetchFromBackend(queryString: string) {
     try {
       const response = await fetch(queryString);
