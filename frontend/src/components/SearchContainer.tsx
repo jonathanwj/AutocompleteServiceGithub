@@ -4,8 +4,6 @@ import RepositoryContainer from "./RepositoryContainer";
 import GithubAPI from "../api/GithubAPI";
 import { stringToArray } from "../api/Utils";
 
-const apiUrl = "http://localhost:3001/github/search/repositories?q=";
-
 export default function SearchContainer() {
   const [loading, setLoading] = React.useState(false);
   const [repositories, setRepositories] = React.useState<any[]>([]);
@@ -72,6 +70,11 @@ export default function SearchContainer() {
     setSelectedRepository(repositories[selectedIndex]);
   }
 
+  function handleOnEnterPressed() {
+    setLoading(false);
+    clearTimeout(typeTimer.current);
+  }
+
   // clear options on searchbar close
   React.useEffect(() => {
     if (!open) {
@@ -89,13 +92,16 @@ export default function SearchContainer() {
           onOptionHover={() => {
             setOptionIsSelected(true);
           }}
+          onOptionSelected={(value: any) => {
+            showRepository(value);
+            setOptionIsSelected(true);
+          }}
+          onEnterPressed={() => {
+            handleOnEnterPressed();
+          }}
           onInputChange={(event: any, value: any, reason: any) => {
             setOptionIsSelected(false);
             setSearchValue(value);
-            if (reason === "reset" && value !== "") {
-              showRepository(value);
-              setOptionIsSelected(true);
-            }
           }}
           open={searchValue !== "" && open}
           onOpen={() => {

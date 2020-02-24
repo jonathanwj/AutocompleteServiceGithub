@@ -3,7 +3,6 @@ import TextField from "@material-ui/core/TextField";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Fuse from "fuse.js";
-import matchSorter from "match-sorter";
 
 const fuseOptions = {
   shouldSort: true,
@@ -51,10 +50,34 @@ const SearchBar = (props: any) => {
     };
   }, [props]);
 
+  // watch enter button press
+  React.useEffect(() => {
+    const inputElementToWatch =
+      autoCompleteRef.current.firstElementChild.firstElementChild
+        .nextElementSibling.firstElementChild;
+    const handleKeyup = (event: any) => {
+      // Number 13 is the "Enter" key on the keyboard
+      if (event.keyCode === 13) {
+        props.onEnterPressed();
+      }
+    };
+    inputElementToWatch.addEventListener("keyup", handleKeyup);
+    return () => {
+      inputElementToWatch.removeEventListener("keyup", handleKeyup);
+    };
+  }, [props]);
+
+  function onInputChangeHandler(event: any, value: any, reason: any) {
+    props.onInputChange(event, value, reason);
+    if (reason === "reset" && value !== "") {
+      props.onOptionSelected(value);
+    }
+  }
+
   return (
     <Autocomplete
       ref={autoCompleteRef}
-      onInputChange={props.onInputChange}
+      onInputChange={onInputChangeHandler}
       id="search-api"
       style={{ width: "100%" }}
       open={props.open}
