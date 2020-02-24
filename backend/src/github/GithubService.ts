@@ -99,7 +99,9 @@ export default class GithubService {
       queryStrBuilder.addOrder(order);
     }
     const queryString = queryStrBuilder.getQueryString();
-    return await this.fetchResultItemsFromGithub(queryString);
+    return await this.fetchResultItemsFromGithub(queryString, {
+      headers: { Accept: "application/vnd.github.cloak-preview" }
+    });
   }
 
   static async searchCode(
@@ -169,7 +171,9 @@ export default class GithubService {
     );
     queryStrBuilder.addKeywordsAndQualifiers(keywordsAndQualifiers);
     const queryString = queryStrBuilder.getQueryString();
-    return await this.fetchResultItemsFromGithub(queryString);
+    return await this.fetchResultItemsFromGithub(queryString, {
+      headers: { Accept: "application/vnd.github.mercy-preview+json" }
+    });
   }
 
   static async searchLabels(
@@ -195,14 +199,19 @@ export default class GithubService {
   }
 
   private static async fetchResultItemsFromGithub(
-    queryString: string
+    queryString: string,
+    queryHeaders?: object
   ): Promise<object[]> {
     if (!RateLimiter.isAllowedNextQuery()) {
       throw new Error(RateLimiter.RATE_LIMIT_ERROR);
     }
     let response: AxiosResponse;
     try {
-      response = await Axios.get(queryString);
+      if (queryHeaders) {
+        response = await Axios.get(queryString, queryHeaders);
+      } else {
+        response = await Axios.get(queryString);
+      }
     } catch (error) {
       let e: any = new Error("Github fetch error");
       e.axiosError = error;

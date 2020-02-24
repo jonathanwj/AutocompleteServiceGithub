@@ -23,30 +23,33 @@ export default function SearchContainer() {
   React.useEffect(() => {
     async function fetchData() {
       try {
-        const response = await GithubAPI.fetchRepositories(
+        const repos = await GithubAPI.searchRepositories(
           stringToArray(searchValue)
         );
-        // const response = await fetch(apiUrl + searchValue);
-        if (response.status === 200) {
-          let repos = await response.json();
-          if (repos.rate_limited_reached) {
-            setRefetchToggle({});
-            return;
-          }
-          let opts = repos.items.map((r: any) => {
-            return { name: r.name, full_name: r.full_name };
-          });
-          setRepositories(repos.items);
-          setOptions(opts);
-          setLoading(false);
+        if (repos.rate_limited_reached) {
+          setRefetchToggle({});
+          return;
         }
+        let opts = repos.items.map((r: any) => {
+          return { name: r.name, full_name: r.full_name };
+        });
+        setRepositories(repos.items);
+        setOptions(opts);
+        setLoading(false);
       } catch (error) {
         setLoading(false);
         setRefetchToggle({});
       }
     }
 
-    if (searchValue === "" || optionIsSelected) {
+    if (searchValue === "") {
+      setLoading(false);
+      clearTimeout(typeTimer.current);
+      setSelectedRepository({});
+      return undefined;
+    }
+
+    if (optionIsSelected) {
       setLoading(false);
       clearTimeout(typeTimer.current);
       return undefined;
