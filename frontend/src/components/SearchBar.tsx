@@ -2,12 +2,27 @@ import React, { useRef } from "react";
 import TextField from "@material-ui/core/TextField";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import Fuse from "fuse.js";
 import matchSorter from "match-sorter";
 
-const filterOptions = (options: any, { inputValue }: { inputValue: string }) =>
-  matchSorter(options, inputValue, {
-    keys: ["name"]
-  });
+const fuseOptions = {
+  shouldSort: true,
+  threshold: 0.6,
+  location: 0,
+  distance: 100,
+  maxPatternLength: 32,
+  minMatchCharLength: 1,
+  keys: ["name"]
+};
+
+const filterOptions = (
+  options: any,
+  { inputValue }: { inputValue: string }
+) => {
+  let fuse = new Fuse(options, fuseOptions);
+  let result = fuse.search(inputValue);
+  return result;
+};
 
 const SearchBar = (props: any) => {
   const autoCompleteRef = useRef<any>(null);
