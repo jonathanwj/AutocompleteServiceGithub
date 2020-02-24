@@ -95,7 +95,7 @@ const SearchBar = (props: any) => {
       options={props.options}
       loading={props.isLoading}
       filterOptions={filterOptions}
-      freeSolo={true}
+      freeSolo={props.freeSolo ? props.freeSolo : false}
       renderInput={params => (
         <TextField
           {...params}

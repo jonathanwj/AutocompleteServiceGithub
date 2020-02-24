@@ -133,6 +133,7 @@ export default function RepositoryContainer(props: any) {
       <SearchBar
         isLoading={loading}
         options={options}
+        freeSolo={true}
         onOptionHover={() => {
           setOptionIsSelected(true);
         }}
