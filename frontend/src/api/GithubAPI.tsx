@@ -139,6 +139,20 @@ export default class GithubAPI {
     return response;
   }
 
+  static async searchTopics(keywordsAndQualifiers: string[]) {
+    let queryStringBuilder = new GithubQueryStringBuilder(this.apiUrl, "topics");
+    if (!keywordsAndQualifiers || keywordsAndQualifiers.length === 0) {
+      throw new Error("No keyword and qualifier specified");
+    }
+    keywordsAndQualifiers.forEach(item => {
+      queryStringBuilder.addKeywordOrQualifier(item);
+    });
+    const response = await this.fetchFromBackend(
+      queryStringBuilder.getQueryString()
+    );
+    return response;
+  }
+
   static async fetchFromBackend(queryString: string) {
     try {
       const response = await fetch(queryString);

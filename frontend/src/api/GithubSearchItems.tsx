@@ -3,5 +3,6 @@ export enum GithubSearchItems {
   Users = "Users",
   Commits = "Commits",
   Code = "Code",
-  IssuesAndPR = "Issues And Pull Requests"
+  IssuesAndPR = "Issues And Pull Requests",
+  Topics = "Topics"
 }

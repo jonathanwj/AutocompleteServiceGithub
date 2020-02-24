@@ -1,9 +1,10 @@
-import React, { useRef } from "react";
+import React from "react";
 import RepositoryContainer from "./RepositoryContainer";
 import SearchRepositorySearchBar from "./SearchRepositorySearchBar";
 import { Select, MenuItem } from "@material-ui/core";
 import { GithubSearchItems } from "../api/GithubSearchItems";
 import SearchUsersSearchBar from "./SearchUsersSearchBar";
+import SearchTopicsSearchBar from "./SearchTopicsSearchBar";
 
 export default function SearchContainer() {
   const [selectedRepository, setSelectedRepository] = React.useState({});
@@ -14,14 +15,18 @@ export default function SearchContainer() {
     <div>
       <h2>Github search autocomplete Service</h2>
       <div>
-        {selectedSearchItem === GithubSearchItems.Repo ? (
+        {selectedSearchItem === GithubSearchItems.Repo && (
           <SearchRepositorySearchBar
             onSelectedRepository={(repo: any) => {
               setSelectedRepository(repo);
             }}
           ></SearchRepositorySearchBar>
-        ) : (
+        )}
+        {selectedSearchItem === GithubSearchItems.Users && (
           <SearchUsersSearchBar></SearchUsersSearchBar>
+        )}
+        {selectedSearchItem === GithubSearchItems.Topics && (
+          <SearchTopicsSearchBar></SearchTopicsSearchBar>
         )}
       </div>
       <div>
@@ -38,6 +43,9 @@ export default function SearchContainer() {
           </MenuItem>
           <MenuItem value={GithubSearchItems.Users}>
             {GithubSearchItems.Users}
+          </MenuItem>
+          <MenuItem value={GithubSearchItems.Topics}>
+            {GithubSearchItems.Topics}
           </MenuItem>
         </Select>
       </div>
