@@ -1,7 +1,7 @@
 import React from "react";
 import RepositoryContainer from "./RepositoryContainer";
 import SearchRepositorySearchBar from "./SearchRepositorySearchBar";
-import { Select, MenuItem } from "@material-ui/core";
+import { Select, MenuItem, FormControl, Typography } from "@material-ui/core";
 import { GithubSearchItems } from "../api/GithubSearchItems";
 import SearchUsersSearchBar from "./SearchUsersSearchBar";
 import SearchTopicsSearchBar from "./SearchTopicsSearchBar";
@@ -13,41 +13,47 @@ export default function SearchContainer() {
   );
   return (
     <div>
-      <h2>Github search autocomplete Service</h2>
-      <div>
-        {selectedSearchItem === GithubSearchItems.Repo && (
-          <SearchRepositorySearchBar
-            onSelectedRepository={(repo: any) => {
-              setSelectedRepository(repo);
-            }}
-          ></SearchRepositorySearchBar>
-        )}
-        {selectedSearchItem === GithubSearchItems.Users && (
-          <SearchUsersSearchBar></SearchUsersSearchBar>
-        )}
-        {selectedSearchItem === GithubSearchItems.Topics && (
-          <SearchTopicsSearchBar></SearchTopicsSearchBar>
-        )}
-      </div>
-      <div>
-        <Select
-          value={selectedSearchItem}
-          onChange={(e: any) => {
-            setSelectedSearchItem(e.target.value);
-            setSelectedRepository({});
-          }}
-          displayEmpty
-        >
-          <MenuItem value={GithubSearchItems.Repo}>
-            {GithubSearchItems.Repo}
-          </MenuItem>
-          <MenuItem value={GithubSearchItems.Users}>
-            {GithubSearchItems.Users}
-          </MenuItem>
-          <MenuItem value={GithubSearchItems.Topics}>
-            {GithubSearchItems.Topics}
-          </MenuItem>
-        </Select>
+      <Typography variant="h5">
+        Github Search Autocomplete Service
+      </Typography>
+      <div style={{ display: "flex", marginTop: "1em" }}>
+        <div style={{ flexGrow: 1 }}>
+          {selectedSearchItem === GithubSearchItems.Repo && (
+            <SearchRepositorySearchBar
+              onSelectedRepository={(repo: any) => {
+                setSelectedRepository(repo);
+              }}
+            ></SearchRepositorySearchBar>
+          )}
+          {selectedSearchItem === GithubSearchItems.Users && (
+            <SearchUsersSearchBar></SearchUsersSearchBar>
+          )}
+          {selectedSearchItem === GithubSearchItems.Topics && (
+            <SearchTopicsSearchBar></SearchTopicsSearchBar>
+          )}
+        </div>
+        <div>
+          <FormControl variant="outlined" style={{ width: "10em" }}>
+            <Select
+              value={selectedSearchItem}
+              onChange={(e: any) => {
+                setSelectedSearchItem(e.target.value);
+                setSelectedRepository({});
+              }}
+              displayEmpty
+            >
+              <MenuItem value={GithubSearchItems.Repo}>
+                {GithubSearchItems.Repo}
+              </MenuItem>
+              <MenuItem value={GithubSearchItems.Users}>
+                {GithubSearchItems.Users}
+              </MenuItem>
+              <MenuItem value={GithubSearchItems.Topics}>
+                {GithubSearchItems.Topics}
+              </MenuItem>
+            </Select>
+          </FormControl>
+        </div>
       </div>
       {Object.keys(selectedRepository).length === 0 ? (
         <div></div>

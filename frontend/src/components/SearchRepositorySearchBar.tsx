@@ -93,6 +93,7 @@ export default function SearchRepositorySearchBar(props: any) {
     <div>
       <div>
         <SearchBar
+          label="Search Repositories"
           isLoading={loading}
           options={options}
           onOptionHover={() => {

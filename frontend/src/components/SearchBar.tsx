@@ -99,7 +99,7 @@ const SearchBar = (props: any) => {
       renderInput={params => (
         <TextField
           {...params}
-          label="Search Github"
+          label={props.label ? props.label : "Search" }
           fullWidth
           variant="outlined"
           InputProps={{

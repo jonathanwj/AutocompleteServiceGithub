@@ -83,6 +83,7 @@ export default function SearchUsersSearchBar(props: any) {
     <div>
       <div>
         <SearchBar
+          label="Search Users"
           isLoading={loading}
           options={options}
           freeSolo={true}

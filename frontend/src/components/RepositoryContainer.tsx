@@ -1,5 +1,15 @@
 import React, { useRef, useCallback } from "react";
-import { Container, MenuItem, Select } from "@material-ui/core";
+import {
+  MenuItem,
+  Select,
+  FormControl,
+  Card,
+  CardContent,
+  Typography,
+  CardActions,
+  Button,
+  makeStyles
+} from "@material-ui/core";
 import SearchBar from "./SearchBar";
 import GithubAPI from "../api/GithubAPI";
 import { stringToArray } from "../api/Utils";
@@ -122,53 +132,106 @@ export default function RepositoryContainer(props: any) {
     }
   }
 
+  const classes = useStyles();
+
   return (
-    <div>
-      <Container>
-        <h1>{repo.full_name}</h1>
-        <h2>{repo.name}</h2>
-        <p>{repo.description}</p>
-        <a href={`${repo.html_url}`}>{repo.html_url}</a>
-      </Container>
-      <SearchBar
-        isLoading={loading}
-        options={options}
-        freeSolo={true}
-        onOptionHover={() => {
-          setOptionIsSelected(true);
-        }}
-        onOptionSelected={(value: any) => {
-          goToUrl(value);
-          setOptionIsSelected(true);
-        }}
-        onEnterPressed={() => {
-          handleOnEnterPressed();
-        }}
-        onInputChange={(event: any, value: any, reason: any) => {
-          setOptionIsSelected(false);
-          setSearchValue(value);
-        }}
-        open={searchValue !== "" && open}
-        onOpen={() => {
-          setOpen(true);
-        }}
-        onClose={() => {
-          setOpen(false);
-        }}
-      ></SearchBar>
-      <Select
-        value={selectedSearchItem}
-        onChange={(e: any) => {
-          setSelectedSearchItem(e.target.value);
-          setOptions([]);
-        }}
-        displayEmpty
-      >
-        <MenuItem value={GithubSearchItems.Commits}>{GithubSearchItems.Commits}</MenuItem>
-        <MenuItem value={GithubSearchItems.IssuesAndPR}>
-          {GithubSearchItems.IssuesAndPR}
-        </MenuItem>
-      </Select>
+    <div style={{ marginTop: "1em" }}>
+      <div style={{ textAlign: "left" }}>
+        <Card className={classes.root}>
+          <CardContent>
+            <Typography
+              className={classes.title}
+              color="textSecondary"
+              gutterBottom
+            >
+              {repo.full_name}
+            </Typography>
+            <Typography variant="h5" component="h2">
+              {repo.name}
+            </Typography>
+            <Typography className={classes.pos} color="textSecondary">
+              {repo.description}
+            </Typography>
+            <div style={{ display: "flex", margin:"1em" }}>
+              <div style={{ flexGrow: 1 }}>
+                <SearchBar
+                  label={"Search " + selectedSearchItem}
+                  isLoading={loading}
+                  options={options}
+                  freeSolo={true}
+                  onOptionHover={() => {
+                    setOptionIsSelected(true);
+                  }}
+                  onOptionSelected={(value: any) => {
+                    goToUrl(value);
+                    setOptionIsSelected(true);
+                  }}
+                  onEnterPressed={() => {
+                    handleOnEnterPressed();
+                  }}
+                  onInputChange={(event: any, value: any, reason: any) => {
+                    setOptionIsSelected(false);
+                    setSearchValue(value);
+                  }}
+                  open={searchValue !== "" && open}
+                  onOpen={() => {
+                    setOpen(true);
+                  }}
+                  onClose={() => {
+                    setOpen(false);
+                  }}
+                ></SearchBar>
+              </div>
+              <div>
+                <FormControl variant="outlined" style={{ width: "8em" }}>
+                  <Select
+                    value={selectedSearchItem}
+                    onChange={(e: any) => {
+                      setSelectedSearchItem(e.target.value);
+                      setOptions([]);
+                    }}
+                    displayEmpty
+                  >
+                    <MenuItem value={GithubSearchItems.Commits}>
+                      {GithubSearchItems.Commits}
+                    </MenuItem>
+                    <MenuItem value={GithubSearchItems.IssuesAndPR}>
+                      {GithubSearchItems.IssuesAndPR}
+                    </MenuItem>
+                  </Select>
+                </FormControl>
+              </div>
+            </div>
+          </CardContent>
+          <CardActions>
+            <Button
+              onClick={() => {
+                window.open(repo.html_url);
+              }}
+              size="small"
+            >
+              Go to Repository
+            </Button>
+          </CardActions>
+        </Card>
+      </div>
     </div>
   );
 }
+
+const useStyles = makeStyles({
+  root: {
+    minWidth: 275
+  },
+  bullet: {
+    display: "inline-block",
+    margin: "0 2px",
+    transform: "scale(0.8)"
+  },
+  title: {
+    fontSize: 14
+  },
+  pos: {
+    marginBottom: 12
+  }
+});
