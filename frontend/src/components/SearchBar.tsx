@@ -67,22 +67,18 @@ const SearchBar = (props: any) => {
     };
   }, [props]);
 
-  function onInputChangeHandler(event: any, value: any, reason: any) {
-    props.onInputChange(event, value, reason);
-    if (reason === "reset" && value !== "") {
-      props.onOptionSelected(value);
-    }
-  }
-
   return (
     <Autocomplete
       ref={autoCompleteRef}
-      onInputChange={onInputChangeHandler}
+      onInputChange={props.onInputChange}
       id="search-api"
       style={{ width: "100%" }}
       open={props.open}
       onOpen={props.onOpen}
       onClose={props.onClose}
+      onChange={(e: any, value: any) => {
+        if (value) props.onOptionSelected(value.full_name);
+      }}
       getOptionSelected={(option: any, value) =>
         option.full_name === value.full_name
       }
@@ -99,7 +95,7 @@ const SearchBar = (props: any) => {
       renderInput={params => (
         <TextField
           {...params}
-          label={props.label ? props.label : "Search" }
+          label={props.label ? props.label : "Search"}
           fullWidth
           variant="outlined"
           InputProps={{

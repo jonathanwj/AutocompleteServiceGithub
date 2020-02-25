@@ -32,7 +32,6 @@ export default function SearchTopicsSearchBar(props: any) {
             ...topic
           };
         });
-        console.log(opts);
         setOptions(opts);
         setLoading(false);
       } catch (error) {
